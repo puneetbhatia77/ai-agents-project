@@ -27,30 +27,24 @@ frontend_task:
     Write a gradio UI in a module app.py that demonstrates the given backend class in {module_name}.
     Assume there is only 1 user, and keep the UI very simple indeed - just a prototype or demo.
     Here are the requirements: {requirements}
-
-    Use current best practices and modern, well-supported APIs.
-    CRITICAL - Do NOT use these deprecated/removed APIs: gr.inputs.* (removed), gr.Interface (deprecated), .style() method (removed).
-    ALWAYS use these modern APIs: gr.Blocks(), gr.Textbox(), gr.Number(), gr.Button(), gr.Tab(), gr.Row().
-
-    Create a well-structured application with proper state management.
-    The backend class instance should be created at module level and referenced by callback functions.
-
-    When creating UI components:
-    - Assign each component to a variable: input_box = gr.Textbox(label="Input", value="default")
-    - Set properties via constructor parameters, never chain methods
-    - Reference component variables in event handlers: button.click(fn=func, inputs=input_box, outputs=output_box)
-
-    Callback function inputs should only receive values from UI input components, never backend class instances.
-    Create a shared output display component and reference it consistently across all button handlers.
-    Organize the interface logically with clear sections using gr.Tab().
-    Include helpful defaults that make the demo easy to test.
-    The code should be production-ready and run successfully without any modifications.
+    
+    CRITICAL REQUIREMENTS for the Gradio app:
+    1. Import the backend class correctly from {module_name} (without .py extension)
+    2. Create a SINGLE global instance of the class at module level (not inside functions)
+    3. Check the __init__ signature of the class - use ONLY the parameters it accepts
+    4. If the class needs initial deposit/balance, call the deposit method after creating the instance
+    5. All callback functions must reference this global instance (do not pass objects as Gradio inputs)
+    6. Create ONE shared output component (gr.Textbox) at the top of gr.Blocks
+    7. All button click handlers must use outputs=<that_output_component>, never use string literals like "div"
+    8. Use gr.Tab() to organize different sections (Deposit/Withdraw, Trading, Reports)
+    9. Set default values for number/text inputs to make testing easy
+    10. Format function returns as clear strings with $ for money values
   expected_output: >
     A gradio UI in module app.py that demonstrates the given backend class.
     The file should be ready so that it can be run as-is, in the same directory as the backend module, and it should import the backend class from {module_name}.
     IMPORTANT: Output ONLY the raw Python code without any markdown formatting, code block delimiters, or backticks.
     The output should be valid Python code that can be directly saved to a file and executed.
-    The application must run successfully with 'python app.py' or 'uv run app.py' without any errors.
+    The code must handle all edge cases and use proper Gradio component references (not strings) for outputs.
   agent: frontend_engineer
   context:
     - code_task
