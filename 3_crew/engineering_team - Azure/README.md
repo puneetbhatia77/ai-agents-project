@@ -20,24 +20,67 @@ crewai install
 ```
 ### Customizing
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+**Add your Azure OpenAI credentials into the `.env` file**
+
+Create a `.env` file in the root directory with the following variables:
+```bash
+AZURE_API_KEY=your_azure_api_key_here
+AZURE_API_BASE=https://your-resource-name.openai.azure.com
+AZURE_API_VERSION=2024-10-01-preview
+```
 
 - Modify `src/engineering_team/config/agents.yaml` to define your agents
 - Modify `src/engineering_team/config/tasks.yaml` to define your tasks
 - Modify `src/engineering_team/crew.py` to add your own logic, tools and specific args
 - Modify `src/engineering_team/main.py` to add custom inputs for your agents and tasks
 
+### Configuration Notes
+
+This project uses **Azure OpenAI** (model: `azure/crew-ai-deployment`) instead of standard OpenAI.
+
+**Docker Note**: Code execution is disabled for backend_engineer and test_engineer agents to avoid Docker dependency. This is configured in `src/engineering_team/crew.py` with `allow_code_execution=False`.
+
+**Gradio UI Standards**: The frontend_engineer agent is configured to use modern Gradio APIs:
+- ✅ Uses: `gr.Blocks()`, `gr.Textbox()`, `gr.Number()`, `gr.Button()`, `gr.Tab()`
+- ❌ Avoids: `gr.inputs.*` (removed), `gr.Interface` (deprecated), `.style()` method (removed)
+- 📋 Default Layout: 4-tab structure for trading/account apps (Account Operations, Shares Operations, Portfolio Summary, Transaction History)
+
 ## Running the Project
+
+### 1. Generate Code with CrewAI
 
 To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
 
 ```bash
-$ crewai run
+crewai run
 ```
 
-This command initializes the engineering_team Crew, assembling the agents and assigning them tasks as defined in your configuration.
+This command initializes the engineering_team Crew, assembling the agents and assigning them tasks as defined in your configuration. The agents will generate:
+- `output/accounts.py` - Backend class with account management logic
+- `output/app.py` - Gradio web UI demonstrating the backend
+- `output/test_accounts.py` - Unit tests for the backend
+- `output/accounts.py_design.md` - Design documentation
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+### 2. Run the Generated Application
+
+After CrewAI successfully generates the code, navigate to the output directory and run the Gradio application:
+
+```bash
+cd output
+uv run --with gradio app.py
+```
+
+Or from the root directory:
+
+```bash
+uv run --with gradio output/app.py
+```
+
+The Gradio interface will launch at `http://127.0.0.1:7860` with a 4-tab layout:
+1. **Account Operations** - Deposit and withdraw funds
+2. **Shares Operations** - Buy and sell shares
+3. **Portfolio Summary** - View portfolio value and profit/loss
+4. **Transaction History** - Review all account transactions
 
 ## Understanding Your Crew
 
